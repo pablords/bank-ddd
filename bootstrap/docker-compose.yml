@@ -4,7 +4,7 @@ services:
   # Banco de dados PostgreSQL
   postgres:
     image: postgres:15-alpine
-    container_name: banking-postgres
+    container_name: postgres
     environment:
       POSTGRES_DB: banking
       POSTGRES_USER: banking
@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-scripts:/docker-entrypoint-initdb.d
     networks:
-      - banking-network
+      - network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U banking -d banking"]
       interval: 10s
@@ -25,13 +25,13 @@ services:
   # Cache Redis
   redis:
     image: redis:7-alpine
-    container_name: banking-redis
+    container_name: redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - banking-network
+      - network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -41,7 +41,7 @@ services:
   # Message Broker RabbitMQ
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: banking-rabbitmq
+    container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -51,7 +51,7 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - banking-network
+      - network
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
@@ -59,11 +59,11 @@ services:
       retries: 3
 
   # Aplicação Banking (opcional - para desenvolvimento completo)
-  banking-app:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: banking-application
+    container_name: application
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/banking
@@ -85,14 +85,14 @@ services:
       rabbitmq:
         condition: service_healthy
     networks:
-      - banking-network
+      - network
     profiles:
       - full-stack
 
   # Prometheus para métricas (opcional)
   prometheus:
     image: prom/prometheus:latest
-    container_name: banking-prometheus
+    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -105,14 +105,14 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
     networks:
-      - banking-network
+      - network
     profiles:
       - monitoring
 
   # Grafana para visualização (opcional)
   grafana:
     image: grafana/grafana:latest
-    container_name: banking-grafana
+    container_name: grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     ports:
@@ -122,7 +122,7 @@ services:
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     networks:
-      - banking-network
+      - network
     profiles:
       - monitoring
 
@@ -139,6 +139,6 @@ volumes:
     driver: local
 
 networks:
-  banking-network:
+  network:
     driver: bridge
-    name: banking-network
+    name: network

@@ -15,33 +15,33 @@ Aplicação implementada seguindo os princípios de **Domain-Driven Design (DDD)
 
 ### 📦 Módulos
 
-- **`banking-domain`** - Lógica de negócio pura (Entities, Value Objects, Domain Services)
-- **`banking-application`** - Casos de uso e orquestração (Commands, Queries, Handlers)
-- **`banking-infrastructure`** - Detalhes técnicos (Persistência, Cache, Mensageria)
-- **`banking-interfaces`** - Pontos de entrada (REST API, CLI)
-- **`banking-bootstrap`** - Configuração e inicialização da aplicação
+- **`domain`** - Lógica de negócio pura (Entities, Value Objects, Domain Services)
+- **`application`** - Casos de uso e orquestração (Commands, Queries, Handlers)
+- **`infrastructure`** - Detalhes técnicos (Persistência, Cache, Mensageria)
+- **`interfaces`** - Pontos de entrada (REST API, CLI)
+- **`bootstrap`** - Configuração e inicialização da aplicação
 
 ### 🔄 Dependências entre Módulos
 
 ```
-banking-bootstrap
-    ├── banking-interfaces
-    ├── banking-infrastructure  
-    ├── banking-application
-    └── banking-domain
+bootstrap
+    ├── interfaces
+    ├── infrastructure  
+    ├── application
+    └── domain
 
-banking-interfaces
-    ├── banking-application
-    └── banking-domain
+interfaces
+    ├── application
+    └── domain
 
-banking-infrastructure
-    ├── banking-application
-    └── banking-domain
+infrastructure
+    ├── application
+    └── domain
 
-banking-application
-    └── banking-domain
+application
+    └── domain
 
-banking-domain
+domain
     └── (sem dependências externas)
 ```
 
@@ -89,7 +89,7 @@ mvn test
 
 4. **Executar a aplicação**
 ```bash
-cd banking-bootstrap
+cd bootstrap
 mvn spring-boot:run
 ```
 
@@ -117,19 +117,19 @@ mvn test
 ### Testes por módulo
 ```bash
 # Testes de domínio
-cd banking-domain && mvn test
+cd domain && mvn test
 
 # Testes de aplicação  
-cd banking-application && mvn test
+cd application && mvn test
 
 # Testes de infraestrutura
-cd banking-infrastructure && mvn test
+cd infrastructure && mvn test
 
 # Testes de interface
-cd banking-interfaces && mvn test
+cd interfaces && mvn test
 
 # Testes de integração
-cd banking-bootstrap && mvn test
+cd bootstrap && mvn test
 ```
 
 ### Testes E2E

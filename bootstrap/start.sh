@@ -76,7 +76,7 @@ build_project() {
 start_infrastructure() {
     log "Iniciando infraestrutura (PostgreSQL, Redis, RabbitMQ)..."
     
-    cd banking-bootstrap
+    cd bootstrap
     
     docker-compose up -d postgres redis rabbitmq
     
@@ -104,7 +104,7 @@ run_migrations() {
     log "Executando migrações do banco de dados..."
     
     cd ..  # Volta para o diretório raiz
-    mvn flyway:migrate -pl banking-bootstrap
+    mvn flyway:migrate -pl bootstrap
     
     if [ $? -eq 0 ]; then
         log "Migrações executadas com sucesso ✓"
@@ -117,12 +117,12 @@ run_migrations() {
 start_application() {
     log "Iniciando Banking Application..."
     
-    cd banking-bootstrap
+    cd bootstrap
     
     # Opção 1: Rodar via Docker
     if [ "$1" = "docker" ]; then
         log "Iniciando aplicação via Docker..."
-        docker-compose --profile full-stack up -d banking-app
+        docker-compose --profile full-stack up -d app
     else
         # Opção 2: Rodar localmente via Maven
         log "Iniciando aplicação localmente..."
@@ -185,7 +185,7 @@ show_info() {
 stop_all() {
     log "Parando todos os serviços..."
     
-    cd banking-bootstrap
+    cd bootstrap
     
     # Para a aplicação local se estiver rodando
     if [ -f app.pid ]; then

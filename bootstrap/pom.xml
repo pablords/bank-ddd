@@ -6,11 +6,11 @@
 
     <parent>
         <groupId>com.banking</groupId>
-        <artifactId>banking-parent</artifactId>
+        <artifactId>parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>banking-bootstrap</artifactId>
+    <artifactId>bootstrap</artifactId>
     <name>Banking Bootstrap</name>
     <description>Módulo principal da aplicação - Orquestrador e configuração Spring Boot</description>
 
@@ -18,25 +18,25 @@
         <!-- Dependências dos módulos internos -->
         <dependency>
             <groupId>com.banking</groupId>
-            <artifactId>banking-domain</artifactId>
+            <artifactId>domain</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.banking</groupId>
-            <artifactId>banking-application</artifactId>
+            <artifactId>application</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.banking</groupId>
-            <artifactId>banking-infrastructure</artifactId>
+            <artifactId>infrastructure</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.banking</groupId>
-            <artifactId>banking-interfaces</artifactId>
+            <artifactId>interfaces</artifactId>
             <version>${project.version}</version>
         </dependency>
 

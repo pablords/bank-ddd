@@ -40,7 +40,7 @@ public class OpenApiConfig {
                         .contact(new Contact()
                                 .name("Banking Team")
                                 .email("banking@example.com")
-                                .url("https://github.com/banking-team/banking-app"))
+                                .url("https://github.com/team/app"))
                         .license(new License()
                                 .name("MIT License")
                                 .url("https://opensource.org/licenses/MIT")))
@@ -49,7 +49,7 @@ public class OpenApiConfig {
                                 .url("http://localhost:8080" + contextPath)
                                 .description("Servidor de desenvolvimento"),
                         new Server()
-                                .url("https://banking-api.example.com" + contextPath)
+                                .url("https://api.example.com" + contextPath)
                                 .description("Servidor de produção")
                 ));
     }

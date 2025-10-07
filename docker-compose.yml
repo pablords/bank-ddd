@@ -3,7 +3,7 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: banking-postgres
+    container_name: postgres
     environment:
       POSTGRES_DB: banking
       POSTGRES_USER: banking_user
@@ -14,21 +14,21 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - banking-network
+      - network
 
   redis:
     image: redis:7-alpine
-    container_name: banking-redis
+    container_name: redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
-      - banking-network
+      - network
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
-    container_name: banking-rabbitmq
+    container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
@@ -38,11 +38,11 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     networks:
-      - banking-network
+      - network
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: banking-prometheus
+    container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
@@ -56,11 +56,11 @@ services:
       - '--storage.tsdb.retention.time=200h'
       - '--web.enable-lifecycle'
     networks:
-      - banking-network
+      - network
 
   grafana:
     image: grafana/grafana:latest
-    container_name: banking-grafana
+    container_name: grafana
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     ports:
@@ -70,7 +70,7 @@ services:
       - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     networks:
-      - banking-network
+      - network
 
 volumes:
   postgres_data:
@@ -80,5 +80,5 @@ volumes:
   grafana_data:
 
 networks:
-  banking-network:
+  network:
     driver: bridge

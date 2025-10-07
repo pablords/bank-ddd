@@ -7,22 +7,22 @@ WORKDIR /app
 
 # Copia os arquivos POM primeiro para cache das dependências
 COPY pom.xml .
-COPY banking-parent/pom.xml banking-parent/
-COPY banking-domain/pom.xml banking-domain/
-COPY banking-application/pom.xml banking-application/
-COPY banking-infrastructure/pom.xml banking-infrastructure/
-COPY banking-interfaces/pom.xml banking-interfaces/
-COPY banking-bootstrap/pom.xml banking-bootstrap/
+COPY parent/pom.xml parent/
+COPY domain/pom.xml domain/
+COPY application/pom.xml application/
+COPY infrastructure/pom.xml infrastructure/
+COPY interfaces/pom.xml interfaces/
+COPY bootstrap/pom.xml bootstrap/
 
 # Baixa as dependências Maven
 RUN mvn dependency:go-offline -B
 
 # Copia o código fonte
-COPY banking-domain/src banking-domain/src
-COPY banking-application/src banking-application/src
-COPY banking-infrastructure/src banking-infrastructure/src
-COPY banking-interfaces/src banking-interfaces/src
-COPY banking-bootstrap/src banking-bootstrap/src
+COPY domain/src domain/src
+COPY application/src application/src
+COPY infrastructure/src infrastructure/src
+COPY interfaces/src interfaces/src
+COPY bootstrap/src bootstrap/src
 
 # Executa o build
 RUN mvn clean package -DskipTests -B
@@ -39,7 +39,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # Copia o JAR da aplicação do stage anterior
-COPY --from=builder /app/banking-bootstrap/target/banking-bootstrap-*.jar app.jar
+COPY --from=builder /app/bootstrap/target/bootstrap-*.jar app.jar
 
 # Define o usuário não-root
 USER banking
