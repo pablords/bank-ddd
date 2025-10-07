@@ -1,8 +1,11 @@
 package com.banking.infrastructure.persistence.mapper;
 
-import com.banking.domain.entity.Transfer;
-import com.banking.domain.value_object.Amount;
-import com.banking.domain.value_object.IdempotencyKey;
+import com.banking.domain.transfer.entity.Transfer;
+import com.banking.domain.transfer.valueobject.Amount;
+import com.banking.domain.transfer.valueobject.IdempotencyKey;
+import com.banking.domain.transfer.valueobject.TransferStatus;
+import com.banking.domain.account.valueobject.AccountId;
+import com.banking.domain.transfer.valueobject.TransferId;
 import com.banking.infrastructure.persistence.jpa.entity.TransferEntity;
 import org.springframework.stereotype.Component;
 
@@ -21,16 +24,16 @@ public class TransferMapper {
             return null;
         }
 
-        return Transfer.builder()
-                .id(entity.getId())
-                .fromAccountId(entity.getFromAccountId())
-                .toAccountId(entity.getToAccountId())
-                .amount(new Amount(entity.getAmount()))
-                .description(entity.getDescription())
-                .idempotencyKey(new IdempotencyKey(entity.getIdempotencyKey()))
-                .status(mapStatusToDomain(entity.getStatus()))
-                .createdAt(entity.getCreatedAt())
-                .build();
+        return Transfer.reconstruct(
+                TransferId.of(entity.getId()),
+                AccountId.of(entity.getFromAccountId()),
+                AccountId.of(entity.getToAccountId()),
+                Amount.of(entity.getAmount()),
+                IdempotencyKey.of(entity.getIdempotencyKey()),
+                entity.getDescription(),
+                mapStatusToDomain(entity.getStatus()),
+                entity.getFailureReason()
+        );
     }
 
     /**
@@ -42,15 +45,14 @@ public class TransferMapper {
         }
 
         TransferEntity entity = new TransferEntity();
-        entity.setId(domain.getId());
-        entity.setFromAccountId(domain.getFromAccountId());
-        entity.setToAccountId(domain.getToAccountId());
+        entity.setId(domain.getId().getValue());
+        entity.setFromAccountId(domain.getFromAccountId().getValue());
+        entity.setToAccountId(domain.getToAccountId().getValue());
         entity.setAmount(domain.getAmount().getValue());
         entity.setDescription(domain.getDescription());
         entity.setIdempotencyKey(domain.getIdempotencyKey().getValue());
         entity.setStatus(mapStatusToEntity(domain.getStatus()));
-        entity.setCreatedAt(domain.getCreatedAt());
-        entity.setUpdatedAt(java.time.LocalDateTime.now());
+        entity.setFailureReason(domain.getFailureReason());
 
         return entity;
     }
@@ -63,34 +65,34 @@ public class TransferMapper {
             return;
         }
 
-        entity.setFromAccountId(domain.getFromAccountId());
-        entity.setToAccountId(domain.getToAccountId());
+        entity.setFromAccountId(domain.getFromAccountId().getValue());
+        entity.setToAccountId(domain.getToAccountId().getValue());
         entity.setAmount(domain.getAmount().getValue());
         entity.setDescription(domain.getDescription());
         entity.setIdempotencyKey(domain.getIdempotencyKey().getValue());
         entity.setStatus(mapStatusToEntity(domain.getStatus()));
-        entity.setUpdatedAt(java.time.LocalDateTime.now());
+        entity.setFailureReason(domain.getFailureReason());
     }
 
     /**
      * Mapeia status da entidade de persistência para domínio
      */
-    private Transfer.TransferStatus mapStatusToDomain(TransferEntity.TransferStatusEnum entityStatus) {
+    private TransferStatus mapStatusToDomain(TransferEntity.TransferStatusEnum entityStatus) {
         if (entityStatus == null) {
             return null;
         }
 
         switch (entityStatus) {
             case PENDING:
-                return Transfer.TransferStatus.PENDING;
+                return TransferStatus.PENDING;
             case PROCESSING:
-                return Transfer.TransferStatus.PROCESSING;
+                return TransferStatus.PROCESSING;
             case COMPLETED:
-                return Transfer.TransferStatus.COMPLETED;
+                return TransferStatus.COMPLETED;
             case FAILED:
-                return Transfer.TransferStatus.FAILED;
+                return TransferStatus.FAILED;
             case CANCELLED:
-                return Transfer.TransferStatus.CANCELLED;
+                return TransferStatus.CANCELLED;
             default:
                 throw new IllegalArgumentException("Status de transferência não reconhecido: " + entityStatus);
         }
@@ -99,7 +101,7 @@ public class TransferMapper {
     /**
      * Mapeia status do domínio para entidade de persistência
      */
-    private TransferEntity.TransferStatusEnum mapStatusToEntity(Transfer.TransferStatus domainStatus) {
+    private TransferEntity.TransferStatusEnum mapStatusToEntity(TransferStatus domainStatus) {
         if (domainStatus == null) {
             return null;
         }

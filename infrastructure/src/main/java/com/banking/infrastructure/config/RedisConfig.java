@@ -71,23 +71,4 @@ public class RedisConfig {
 
         return template;
     }
-
-    /**
-     * Template específico para Strings (mais performático para operações simples)
-     */
-    @Bean
-    public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory connectionFactory) {
-        RedisTemplate<String, String> template = new RedisTemplate<>();
-        template.setConnectionFactory(connectionFactory);
-
-        StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        template.setKeySerializer(stringSerializer);
-        template.setValueSerializer(stringSerializer);
-        template.setHashKeySerializer(stringSerializer);
-        template.setHashValueSerializer(stringSerializer);
-        template.setDefaultSerializer(stringSerializer);
-        
-        template.afterPropertiesSet();
-        return template;
-    }
 }

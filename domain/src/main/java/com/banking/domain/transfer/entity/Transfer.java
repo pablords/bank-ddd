@@ -47,6 +47,18 @@ public class Transfer extends AggregateRoot<TransferId> {
         return new Transfer(id, fromAccountId, toAccountId, amount, idempotencyKey, description);
     }
 
+    // Package-private constructor for reconstruction from persistence
+    public static Transfer reconstruct(TransferId id, AccountId fromAccountId, AccountId toAccountId, 
+                                     Amount amount, IdempotencyKey idempotencyKey, String description,
+                                     TransferStatus status, String failureReason) {
+        Transfer transfer = new Transfer(id, fromAccountId, toAccountId, amount, idempotencyKey, description);
+        transfer.status = status;
+        transfer.failureReason = failureReason;
+        // Don't fire domain events during reconstruction
+        transfer.clearDomainEvents();
+        return transfer;
+    }
+
     public void markAsProcessing() {
         if (!status.canTransitionTo(TransferStatus.PROCESSING)) {
             throw new IllegalStateException("Cannot transition to PROCESSING from " + status);

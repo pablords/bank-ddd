@@ -52,7 +52,7 @@ public class AccountEntity {
     private LocalDateTime updatedAt;
 
     // Construtor padrão para JPA
-    protected AccountEntity() {}
+    public AccountEntity() {}
 
     public AccountEntity(String id, String accountNumber, String holderName, 
                         String holderCpf, BigDecimal balance, Boolean active) {

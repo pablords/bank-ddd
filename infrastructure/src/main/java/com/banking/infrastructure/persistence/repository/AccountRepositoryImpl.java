@@ -1,9 +1,10 @@
 package com.banking.infrastructure.persistence.repository;
 
-import com.banking.domain.entity.Account;
-import com.banking.domain.repository.AccountRepository;
-import com.banking.domain.value_object.AccountNumber;
-import com.banking.domain.value_object.CPF;
+import com.banking.domain.account.entity.Account;
+import com.banking.domain.account.repository.AccountRepository;
+import com.banking.domain.account.valueobject.AccountNumber;
+import com.banking.domain.account.valueobject.Cpf;
+import com.banking.domain.account.valueobject.AccountId;
 import com.banking.infrastructure.persistence.jpa.entity.AccountEntity;
 import com.banking.infrastructure.persistence.jpa.repository.JpaAccountRepository;
 import com.banking.infrastructure.persistence.mapper.AccountMapper;
@@ -31,8 +32,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public Optional<Account> findById(String id) {
-        return jpaAccountRepository.findById(id)
+    public Optional<Account> findById(AccountId id) {
+        return jpaAccountRepository.findById(id.getValue())
                 .map(accountMapper::toDomain);
     }
 
@@ -43,13 +44,24 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public boolean existsByCpf(CPF cpf) {
+    public Optional<Account> findByHolderCpf(Cpf cpf) {
+        return jpaAccountRepository.findByHolderCpf(cpf.getValue())
+                .map(accountMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsByHolderCpf(Cpf cpf) {
         return jpaAccountRepository.existsByHolderCpf(cpf.getValue());
     }
 
     @Override
     public boolean existsByAccountNumber(AccountNumber accountNumber) {
         return jpaAccountRepository.existsByAccountNumber(accountNumber.getValue());
+    }
+
+    @Override
+    public boolean existsById(AccountId id) {
+        return jpaAccountRepository.existsById(id.getValue());
     }
 
     @Override
@@ -61,11 +73,21 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public List<Account> findActiveAccounts() {
-        return jpaAccountRepository.findByIsActiveTrue()
+    public List<Account> findAllActive() {
+        return jpaAccountRepository.findByActiveTrue()
                 .stream()
                 .map(accountMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public long countActive() {
+        return jpaAccountRepository.countByActiveTrue();
+    }
+
+    @Override
+    public long count() {
+        return jpaAccountRepository.count();
     }
 
     @Override
@@ -82,26 +104,15 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public void deleteById(String id) {
-        jpaAccountRepository.deleteById(id);
+    public void deleteById(AccountId id) {
+        jpaAccountRepository.deleteById(id.getValue());
     }
 
     /**
      * Métodos específicos de negócio não definidos na interface do domínio
      */
-    
-    public long countActiveAccounts() {
-        return jpaAccountRepository.countByIsActiveTrue();
-    }
 
     public java.math.BigDecimal calculateTotalBalance() {
         return jpaAccountRepository.calculateTotalBalance();
-    }
-
-    public List<Account> findAccountsWithLowBalance(java.math.BigDecimal threshold) {
-        return jpaAccountRepository.findByBalanceLessThan(threshold)
-                .stream()
-                .map(accountMapper::toDomain)
-                .collect(Collectors.toList());
     }
 }

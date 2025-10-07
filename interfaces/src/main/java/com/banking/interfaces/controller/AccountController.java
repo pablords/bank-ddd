@@ -1,10 +1,10 @@
 package com.banking.interfaces.controller;
 
-import com.banking.application.query.GetAccountByIdQuery;
-import com.banking.application.query.GetAccountByNumberQuery;
-import com.banking.application.query.GetAllAccountsQuery;
-import com.banking.application.service.AccountApplicationService;
-import com.banking.domain.entity.Account;
+import com.banking.application.account.query.GetAccountQuery;
+import com.banking.application.account.query.GetAccountHandler;
+import com.banking.application.account.command.CreateAccountCommand;
+import com.banking.application.account.command.CreateAccountHandler;
+import com.banking.domain.account.entity.Account;
 import com.banking.interfaces.dto.request.CreateAccountRequest;
 import com.banking.interfaces.dto.response.AccountResponse;
 import com.banking.interfaces.dto.response.ApiResponse;
@@ -31,13 +31,16 @@ import java.util.stream.Collectors;
 @Tag(name = "Accounts", description = "Operações relacionadas a contas bancárias")
 public class AccountController {
 
-    private final AccountApplicationService accountApplicationService;
+    private final CreateAccountHandler createAccountHandler;
+    private final GetAccountHandler getAccountHandler;
     private final InterfaceMapper interfaceMapper;
 
     @Autowired
-    public AccountController(AccountApplicationService accountApplicationService, 
+    public AccountController(CreateAccountHandler createAccountHandler,
+                           GetAccountHandler getAccountHandler,
                            InterfaceMapper interfaceMapper) {
-        this.accountApplicationService = accountApplicationService;
+        this.createAccountHandler = createAccountHandler;
+        this.getAccountHandler = getAccountHandler;
         this.interfaceMapper = interfaceMapper;
     }
 
@@ -56,21 +59,28 @@ public class AccountController {
             @Valid @RequestBody CreateAccountRequest request) {
         
         try {
-            var createAccountDTO = interfaceMapper.toCreateAccountDTO(request);
-            Account account = accountApplicationService.createAccount(createAccountDTO);
-            AccountResponse response = interfaceMapper.toAccountResponse(account);
+            var accountDTO = interfaceMapper.toCreateAccountDTO(request);
+            var command = CreateAccountCommand.from(accountDTO);
+            var applicationResponse = createAccountHandler.handle(command);
+            
+            // Convert application DTO to interface DTO
+            var response = interfaceMapper.fromApplication(applicationResponse);
             
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(ApiResponse.success("Conta criada com sucesso", response));
-        } catch (Exception e) {
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(ApiResponse.error("Erro ao criar conta: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Erro interno: " + e.getMessage()));
         }
     }
 
     /**
      * Busca uma conta por ID
      */
+    /*
     @GetMapping("/{id}")
     @Operation(summary = "Buscar conta por ID", 
                description = "Retorna os dados de uma conta específica pelo seu ID")
@@ -90,80 +100,6 @@ public class AccountController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.error("Conta não encontrada: " + e.getMessage()));
-        }
-    }
-
-    /**
-     * Busca uma conta por número
-     */
-    @GetMapping("/number/{accountNumber}")
-    @Operation(summary = "Buscar conta por número", 
-               description = "Retorna os dados de uma conta específica pelo seu número")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Conta encontrada"),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Conta não encontrada")
-    })
-    public ResponseEntity<ApiResponse<AccountResponse>> getAccountByNumber(
-            @Parameter(description = "Número da conta") @PathVariable String accountNumber) {
-        
-        try {
-            var query = new GetAccountByNumberQuery(accountNumber);
-            Account account = accountApplicationService.getAccountByNumber(query);
-            AccountResponse response = interfaceMapper.toAccountResponse(account);
-            
-            return ResponseEntity.ok(ApiResponse.success(response));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("Conta não encontrada: " + e.getMessage()));
-        }
-    }
-
-    /**
-     * Lista todas as contas
-     */
-    @GetMapping
-    @Operation(summary = "Listar todas as contas", 
-               description = "Retorna a lista de todas as contas bancárias")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lista de contas retornada com sucesso")
-    })
-    public ResponseEntity<ApiResponse<List<AccountResponse>>> getAllAccounts() {
-        
-        try {
-            var query = new GetAllAccountsQuery();
-            List<Account> accounts = accountApplicationService.getAllAccounts(query);
-            List<AccountResponse> responses = accounts.stream()
-                    .map(interfaceMapper::toAccountResponse)
-                    .collect(Collectors.toList());
-            
-            return ResponseEntity.ok(ApiResponse.success(responses));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Erro ao buscar contas: " + e.getMessage()));
-        }
-    }
-
-    /**
-     * Busca contas ativas
-     */
-    @GetMapping("/active")
-    @Operation(summary = "Listar contas ativas", 
-               description = "Retorna a lista de contas bancárias ativas")
-    @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Lista de contas ativas retornada com sucesso")
-    })
-    public ResponseEntity<ApiResponse<List<AccountResponse>>> getActiveAccounts() {
-        
-        try {
-            List<Account> accounts = accountApplicationService.getActiveAccounts();
-            List<AccountResponse> responses = accounts.stream()
-                    .map(interfaceMapper::toAccountResponse)
-                    .collect(Collectors.toList());
-            
-            return ResponseEntity.ok(ApiResponse.success(responses));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(ApiResponse.error("Erro ao buscar contas ativas: " + e.getMessage()));
         }
     }
 

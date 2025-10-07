@@ -7,8 +7,9 @@
 
     <parent>
         <groupId>com.banking</groupId>
-        <artifactId>system</artifactId>
+        <artifactId>parent</artifactId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>domain</artifactId>

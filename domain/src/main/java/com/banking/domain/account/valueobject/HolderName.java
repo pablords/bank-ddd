@@ -30,8 +30,20 @@ public class HolderName extends ValueObject {
      * Retorna o nome formatado (primeira letra maiúscula)
      */
     public String getFormattedValue() {
-        return value.toLowerCase()
-                   .replaceAll("\\b\\w", m -> m.group().toUpperCase());
+        String[] words = value.toLowerCase().split("\\s+");
+        StringBuilder result = new StringBuilder();
+        
+        for (int i = 0; i < words.length; i++) {
+            if (i > 0) {
+                result.append(" ");
+            }
+            if (!words[i].isEmpty()) {
+                result.append(words[i].substring(0, 1).toUpperCase())
+                      .append(words[i].substring(1));
+            }
+        }
+        
+        return result.toString();
     }
 
     @Override

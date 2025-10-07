@@ -43,10 +43,20 @@ public interface JpaAccountRepository extends JpaRepository<AccountEntity, Strin
     List<AccountEntity> findAllActive();
 
     /**
+     * Encontra todas as contas ativas (método Spring Data JPA)
+     */
+    List<AccountEntity> findByActiveTrue();
+
+    /**
      * Conta o número de contas ativas
      */
     @Query("SELECT COUNT(a) FROM AccountEntity a WHERE a.active = true")
     long countActive();
+
+    /**
+     * Conta o número de contas ativas (método Spring Data JPA)
+     */
+    long countByActiveTrue();
 
     /**
      * Encontra contas por nome do titular (busca parcial, case insensitive)

@@ -1,6 +1,6 @@
 package com.banking.infrastructure.messaging;
 
-import com.banking.domain.event.DomainEvent;
+import com.banking.domain.shared.base.DomainEvent;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

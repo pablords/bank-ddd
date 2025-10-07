@@ -1,6 +1,7 @@
 package com.banking.application.account.command;
 
 import com.banking.application.account.dto.AccountResponse;
+import com.banking.application.account.dto.CreateAccountRequest;
 import com.banking.application.shared.base.CommandHandler;
 import com.banking.application.shared.exception.ValidationException;
 import com.banking.application.shared.interfaces.EventBus;

@@ -15,6 +15,11 @@ public class ValidationException extends ApplicationException {
         this.validationErrors = List.of(message);
     }
 
+    public ValidationException(String message, Throwable cause) {
+        super(message, "VALIDATION_ERROR", cause);
+        this.validationErrors = List.of(message);
+    }
+
     public ValidationException(List<String> validationErrors) {
         super("Validation failed: " + String.join(", ", validationErrors), "VALIDATION_ERROR");
         this.validationErrors = List.copyOf(validationErrors);

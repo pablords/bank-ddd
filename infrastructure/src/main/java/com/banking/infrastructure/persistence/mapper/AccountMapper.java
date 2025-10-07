@@ -1,9 +1,11 @@
 package com.banking.infrastructure.persistence.mapper;
 
-import com.banking.domain.entity.Account;
-import com.banking.domain.value_object.AccountNumber;
-import com.banking.domain.value_object.Balance;
-import com.banking.domain.value_object.CPF;
+import com.banking.domain.account.entity.Account;
+import com.banking.domain.account.valueobject.AccountNumber;
+import com.banking.domain.account.valueobject.Balance;
+import com.banking.domain.account.valueobject.Cpf;
+import com.banking.domain.account.valueobject.AccountId;
+import com.banking.domain.account.valueobject.HolderName;
 import com.banking.infrastructure.persistence.jpa.entity.AccountEntity;
 import org.springframework.stereotype.Component;
 
@@ -22,15 +24,14 @@ public class AccountMapper {
             return null;
         }
 
-        return Account.builder()
-                .id(entity.getId())
-                .accountNumber(new AccountNumber(entity.getAccountNumber()))
-                .holderName(entity.getHolderName())
-                .holderCpf(new CPF(entity.getHolderCpf()))
-                .balance(new Balance(entity.getBalance()))
-                .isActive(entity.getIsActive())
-                .createdAt(entity.getCreatedAt())
-                .build();
+        return new Account(
+                AccountId.of(entity.getId()),
+                AccountNumber.of(entity.getAccountNumber()),
+                HolderName.of(entity.getHolderName()),
+                Cpf.of(entity.getHolderCpf()),
+                Balance.of(entity.getBalance()),
+                entity.getActive()
+        );
     }
 
     /**
@@ -42,14 +43,12 @@ public class AccountMapper {
         }
 
         AccountEntity entity = new AccountEntity();
-        entity.setId(domain.getId());
+        entity.setId(domain.getId().getValue());
         entity.setAccountNumber(domain.getAccountNumber().getValue());
-        entity.setHolderName(domain.getHolderName());
+        entity.setHolderName(domain.getHolderName().getValue());
         entity.setHolderCpf(domain.getHolderCpf().getValue());
-        entity.setBalance(domain.getBalance().getValue());
-        entity.setIsActive(domain.getIsActive());
-        entity.setCreatedAt(domain.getCreatedAt());
-        entity.setUpdatedAt(java.time.LocalDateTime.now());
+        entity.setBalance(domain.getBalance().getAmount());
+        entity.setActive(domain.isActive());
 
         return entity;
     }
@@ -63,10 +62,9 @@ public class AccountMapper {
         }
 
         entity.setAccountNumber(domain.getAccountNumber().getValue());
-        entity.setHolderName(domain.getHolderName());
+        entity.setHolderName(domain.getHolderName().getValue());
         entity.setHolderCpf(domain.getHolderCpf().getValue());
-        entity.setBalance(domain.getBalance().getValue());
-        entity.setIsActive(domain.getIsActive());
-        entity.setUpdatedAt(java.time.LocalDateTime.now());
+        entity.setBalance(domain.getBalance().getAmount());
+        entity.setActive(domain.isActive());
     }
 }

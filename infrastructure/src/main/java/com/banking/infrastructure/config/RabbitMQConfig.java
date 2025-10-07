@@ -4,7 +4,7 @@ import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.TopicExchange;
-import org.springframework.amqp.rabbit.annotation.EnableRabbitMQ;
+import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -18,7 +18,7 @@ import org.springframework.context.annotation.Configuration;
  * Define exchanges, filas, bindings e conversores para eventos de domínio.
  */
 @Configuration
-@EnableRabbitMQ
+@EnableRabbit
 public class RabbitMQConfig {
 
     @Value("${banking.messaging.exchange:banking.events}")

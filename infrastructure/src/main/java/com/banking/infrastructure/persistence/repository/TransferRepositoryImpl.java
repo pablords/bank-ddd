@@ -1,8 +1,11 @@
 package com.banking.infrastructure.persistence.repository;
 
-import com.banking.domain.entity.Transfer;
-import com.banking.domain.repository.TransferRepository;
-import com.banking.domain.value_object.IdempotencyKey;
+import com.banking.domain.transfer.entity.Transfer;
+import com.banking.domain.transfer.repository.TransferRepository;
+import com.banking.domain.transfer.valueobject.IdempotencyKey;
+import com.banking.domain.transfer.valueobject.TransferId;
+import com.banking.domain.transfer.valueobject.TransferStatus;
+import com.banking.domain.account.valueobject.AccountId;
 import com.banking.infrastructure.persistence.jpa.entity.TransferEntity;
 import com.banking.infrastructure.persistence.jpa.repository.JpaTransferRepository;
 import com.banking.infrastructure.persistence.mapper.TransferMapper;
@@ -14,10 +17,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * Implementação do repositório de transferências usando JPA.
- * Traduz entre entidades do domínio e entidades de persistência.
- */
 @Repository
 public class TransferRepositoryImpl implements TransferRepository {
 
@@ -31,8 +30,8 @@ public class TransferRepositoryImpl implements TransferRepository {
     }
 
     @Override
-    public Optional<Transfer> findById(String id) {
-        return jpaTransferRepository.findById(id)
+    public Optional<Transfer> findById(TransferId id) {
+        return jpaTransferRepository.findById(id.getValue())
                 .map(transferMapper::toDomain);
     }
 
@@ -48,27 +47,37 @@ public class TransferRepositoryImpl implements TransferRepository {
     }
 
     @Override
-    public List<Transfer> findByFromAccountId(String accountId) {
-        return jpaTransferRepository.findByFromAccountId(accountId)
+    public boolean existsById(TransferId id) {
+        return jpaTransferRepository.existsById(id.getValue());
+    }
+
+    @Override
+    public List<Transfer> findByFromAccountId(AccountId fromAccountId) {
+        return jpaTransferRepository.findByFromAccountId(fromAccountId.getValue())
                 .stream()
                 .map(transferMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Transfer> findByToAccountId(String accountId) {
-        return jpaTransferRepository.findByToAccountId(accountId)
+    public List<Transfer> findByToAccountId(AccountId accountId) {
+        return jpaTransferRepository.findByToAccountId(accountId.getValue())
                 .stream()
                 .map(transferMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<Transfer> findTransferHistory(String accountId) {
-        return jpaTransferRepository.findTransferHistory(accountId)
+    public List<Transfer> findTransferHistory(AccountId accountId) {
+        return jpaTransferRepository.findTransferHistory(accountId.getValue())
                 .stream()
                 .map(transferMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public long count() {
+        return jpaTransferRepository.count();
     }
 
     @Override
@@ -85,8 +94,8 @@ public class TransferRepositoryImpl implements TransferRepository {
     }
 
     @Override
-    public void deleteById(String id) {
-        jpaTransferRepository.deleteById(id);
+    public void deleteById(TransferId id) {
+        jpaTransferRepository.deleteById(id.getValue());
     }
 
     @Override
@@ -97,25 +106,22 @@ public class TransferRepositoryImpl implements TransferRepository {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Métodos específicos de infraestrutura para operações administrativas
-     */
-    
-    public List<Transfer> findPendingTransfersOlderThan(LocalDateTime cutoffTime) {
-        return jpaTransferRepository.findPendingTransfersOlderThan(cutoffTime)
+    @Override
+    public List<Transfer> findByStatus(TransferStatus status) {
+        return jpaTransferRepository.findByStatus(mapStatusToEntity(status))
                 .stream()
                 .map(transferMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
-    public List<Transfer> findFailedTransfers() {
-        return jpaTransferRepository.findFailedTransfers()
-                .stream()
-                .map(transferMapper::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    public java.math.BigDecimal calculateTotalTransferredBetween(LocalDateTime startDate, LocalDateTime endDate) {
-        return jpaTransferRepository.calculateTotalTransferredBetween(startDate, endDate);
+    private TransferEntity.TransferStatusEnum mapStatusToEntity(TransferStatus status) {
+        switch (status) {
+            case PENDING: return TransferEntity.TransferStatusEnum.PENDING;
+            case PROCESSING: return TransferEntity.TransferStatusEnum.PROCESSING;
+            case COMPLETED: return TransferEntity.TransferStatusEnum.COMPLETED;
+            case FAILED: return TransferEntity.TransferStatusEnum.FAILED;
+            case CANCELLED: return TransferEntity.TransferStatusEnum.CANCELLED;
+            default: throw new IllegalArgumentException("Unknown status: " + status);
+        }
     }
 }

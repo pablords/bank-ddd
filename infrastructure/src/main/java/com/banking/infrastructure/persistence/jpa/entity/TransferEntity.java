@@ -66,7 +66,7 @@ public class TransferEntity {
     }
 
     // Construtor padrão para JPA
-    protected TransferEntity() {}
+    public TransferEntity() {}
 
     public TransferEntity(String id, String fromAccountId, String toAccountId, 
                          BigDecimal amount, TransferStatusEnum status, String idempotencyKey, 

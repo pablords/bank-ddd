@@ -1,8 +1,8 @@
 package com.banking.infrastructure.messaging.listener;
 
-import com.banking.domain.event.AccountCreatedEvent;
-import com.banking.domain.event.TransferCompletedEvent;
-import com.banking.domain.event.TransferFailedEvent;
+import com.banking.domain.account.event.AccountCreated;
+import com.banking.domain.transfer.event.TransferCompleted;
+import com.banking.domain.transfer.event.TransferFailed;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
@@ -17,13 +17,13 @@ public class DomainEventListener {
      * Processa eventos de conta criada
      */
     @RabbitListener(queues = "${banking.messaging.queues.account-created:banking.account.created}")
-    public void handleAccountCreated(AccountCreatedEvent event) {
+    public void handleAccountCreated(AccountCreated event) {
         try {
             System.out.println("=== EVENTO: Conta Criada ===");
             System.out.println("Account ID: " + event.getAccountId());
             System.out.println("Account Number: " + event.getAccountNumber());
             System.out.println("Holder Name: " + event.getHolderName());
-            System.out.println("Timestamp: " + event.getTimestamp());
+            System.out.println("Timestamp: " + event.getOccurredOn());
             
             // Aqui você pode implementar lógicas complementares como:
             // - Envio de email de boas-vindas
@@ -43,14 +43,14 @@ public class DomainEventListener {
      * Processa eventos de transferência completada
      */
     @RabbitListener(queues = "${banking.messaging.queues.transfer-completed:banking.transfer.completed}")
-    public void handleTransferCompleted(TransferCompletedEvent event) {
+    public void handleTransferCompleted(TransferCompleted event) {
         try {
             System.out.println("=== EVENTO: Transferência Completada ===");
             System.out.println("Transfer ID: " + event.getTransferId());
             System.out.println("From Account: " + event.getFromAccountId());
             System.out.println("To Account: " + event.getToAccountId());
             System.out.println("Amount: " + event.getAmount());
-            System.out.println("Timestamp: " + event.getTimestamp());
+            System.out.println("Timestamp: " + event.getOccurredOn());
             
             // Lógicas complementares para transferência completada:
             // - Notificações push/email para ambas as contas
@@ -69,7 +69,7 @@ public class DomainEventListener {
      * Processa eventos de transferência falhada
      */
     @RabbitListener(queues = "${banking.messaging.queues.transfer-failed:banking.transfer.failed}")
-    public void handleTransferFailed(TransferFailedEvent event) {
+    public void handleTransferFailed(TransferFailed event) {
         try {
             System.out.println("=== EVENTO: Transferência Falhada ===");
             System.out.println("Transfer ID: " + event.getTransferId());
@@ -77,7 +77,7 @@ public class DomainEventListener {
             System.out.println("To Account: " + event.getToAccountId());
             System.out.println("Amount: " + event.getAmount());
             System.out.println("Reason: " + event.getReason());
-            System.out.println("Timestamp: " + event.getTimestamp());
+            System.out.println("Timestamp: " + event.getOccurredOn());
             
             // Lógicas para transferência falhada:
             // - Notificação de falha para o usuário
@@ -95,7 +95,7 @@ public class DomainEventListener {
     /**
      * Processa efeitos colaterais da criação de conta
      */
-    private void processAccountCreatedSideEffects(AccountCreatedEvent event) {
+    private void processAccountCreatedSideEffects(AccountCreated event) {
         // Implementar lógicas específicas do negócio
         System.out.println("Processando efeitos colaterais da criação de conta...");
         
@@ -112,7 +112,7 @@ public class DomainEventListener {
     /**
      * Processa efeitos colaterais da transferência completada
      */
-    private void processTransferCompletedSideEffects(TransferCompletedEvent event) {
+    private void processTransferCompletedSideEffects(TransferCompleted event) {
         System.out.println("Processando efeitos colaterais da transferência completada...");
         
         // Exemplo: Atualização de estatísticas
@@ -125,7 +125,7 @@ public class DomainEventListener {
     /**
      * Processa efeitos colaterais da transferência falhada
      */
-    private void processTransferFailedSideEffects(TransferFailedEvent event) {
+    private void processTransferFailedSideEffects(TransferFailed event) {
         System.out.println("Processando efeitos colaterais da transferência falhada...");
         
         // Exemplo: Alertas
