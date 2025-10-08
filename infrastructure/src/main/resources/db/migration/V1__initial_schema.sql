@@ -1,8 +1,4 @@
--- Criação do banco de dados banking
-CREATE DATABASE banking;
-
--- Usar o banco de dados
-\c banking;
+-- Criação do schema inicial do sistema bancário
 
 -- Criação da tabela de contas
 CREATE TABLE accounts (

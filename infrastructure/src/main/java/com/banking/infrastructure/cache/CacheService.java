@@ -1,30 +1,35 @@
 package com.banking.infrastructure.cache;
 
+import com.banking.application.shared.interfaces.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Serviço de cache usando Redis para armazenamento de dados temporários.
+ * Implementação do CacheService usando Redis para armazenamento de dados temporários.
  * Fornece operações de cache para melhorar performance e implementar idempotência.
  */
 @Service
-public class CacheService {
+public class RedisCacheService implements CacheService {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Autowired
-    public CacheService(RedisTemplate<String, Object> redisTemplate) {
+    public RedisCacheService(RedisTemplate<String, Object> redisTemplate) {
         this.redisTemplate = redisTemplate;
     }
 
-    /**
-     * Armazena um valor no cache com TTL
-     */
+    @Override
+    public void put(String key, Object value) {
+        redisTemplate.opsForValue().set(key, value);
+    }
+
+    @Override
     public void put(String key, Object value, Duration ttl) {
         redisTemplate.opsForValue().set(key, value, ttl);
     }
@@ -43,11 +48,9 @@ public class CacheService {
         return redisTemplate.opsForValue().get(key);
     }
 
-    /**
-     * Recupera um valor do cache com tipo específico
-     */
+    @Override
     @SuppressWarnings("unchecked")
-    public <T> T get(String key, Class<T> type) {
+    public <T> Optional<T> get(String key, Class<T> type) {
         Object value = redisTemplate.opsForValue().get(key);
         if (value != null && type.isInstance(value)) {
             return (T) value;

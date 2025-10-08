@@ -94,10 +94,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Trata exceções de duplicação (conflitos)
+     * Trata exceções genéricas não mapeadas
      */
-    @ExceptionHandler(value = {})
-    public ResponseEntity<ApiResponse<Object>> handleConflictException(
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Object>> handleGenericException(
             Exception ex, WebRequest request) {
         
         // Verifica se é uma exceção de conflito baseada na mensagem
@@ -113,16 +113,6 @@ public class GlobalExceptionHandler {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         }
         
-        return handleGenericException(ex, request);
-    }
-
-    /**
-     * Trata exceções genéricas não mapeadas
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Object>> handleGenericException(
-            Exception ex, WebRequest request) {
-        
         ApiResponse<Object> response = ApiResponse.error("Erro interno do servidor");
         response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.setPath(request.getDescription(false).replace("uri=", ""));
@@ -132,33 +122,5 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-    }
-
-    /**
-     * Trata exceções específicas de saldo insuficiente
-     */
-    @ExceptionHandler(value = {})
-    public ResponseEntity<ApiResponse<Object>> handleInsufficientBalanceException(
-            Exception ex, WebRequest request) {
-        
-        ApiResponse<Object> response = ApiResponse.error("Saldo insuficiente para realizar a operação");
-        response.setStatusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
-        response.setPath(request.getDescription(false).replace("uri=", ""));
-        
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(response);
-    }
-
-    /**
-     * Trata exceções de conta inativa
-     */
-    @ExceptionHandler(value = {})
-    public ResponseEntity<ApiResponse<Object>> handleInactiveAccountException(
-            Exception ex, WebRequest request) {
-        
-        ApiResponse<Object> response = ApiResponse.error("Operação não permitida em conta inativa");
-        response.setStatusCode(HttpStatus.FORBIDDEN.value());
-        response.setPath(request.getDescription(false).replace("uri=", ""));
-        
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 }

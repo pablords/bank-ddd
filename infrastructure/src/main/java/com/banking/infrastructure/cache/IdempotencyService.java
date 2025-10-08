@@ -1,6 +1,6 @@
 package com.banking.infrastructure.cache;
 
-import com.banking.infrastructure.cache.CacheService;
+import com.banking.application.shared.interfaces.CacheService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +52,7 @@ public class IdempotencyService {
      */
     public Object getResult(String idempotencyKey) {
         String fullKey = buildKey(idempotencyKey);
-        return cacheService.get(fullKey);
+        return cacheService.get(fullKey, Object.class).orElse(null);
     }
 
     /**
@@ -60,7 +60,7 @@ public class IdempotencyService {
      */
     public <T> T getResult(String idempotencyKey, Class<T> type) {
         String fullKey = buildKey(idempotencyKey);
-        return cacheService.get(fullKey, type);
+        return cacheService.get(fullKey, type).orElse(null);
     }
 
     /**
@@ -85,7 +85,8 @@ public class IdempotencyService {
      */
     public boolean removeKey(String idempotencyKey) {
         String fullKey = buildKey(idempotencyKey);
-        return cacheService.delete(fullKey);
+        cacheService.evict(fullKey);
+        return true; // evict() não retorna boolean, assumimos sucesso
     }
 
     /**
@@ -103,7 +104,7 @@ public class IdempotencyService {
      */
     public long getRemainingTtl(String idempotencyKey) {
         String fullKey = buildKey(idempotencyKey);
-        return cacheService.getTtl(fullKey);
+        return cacheService.getTtl(fullKey).map(Duration::getSeconds).orElse(-1L);
     }
 
     /**
@@ -111,7 +112,7 @@ public class IdempotencyService {
      */
     public boolean isProcessing(String idempotencyKey) {
         String fullKey = buildKey(idempotencyKey);
-        Object value = cacheService.get(fullKey);
+        Object value = cacheService.get(fullKey, Object.class).orElse(null);
         return "PROCESSING".equals(value);
     }
 

@@ -78,4 +78,10 @@ public interface CacheService {
      * Decrementa um valor numérico por um delta
      */
     Long decrement(String key, long delta);
+
+    /**
+     * Define um valor apenas se a chave não existir (operação atômica)
+     * Retorna true se o valor foi definido, false se a chave já existia
+     */
+    boolean setIfAbsent(String key, Object value, Duration ttl);
 }

@@ -16,7 +16,7 @@ import java.util.Objects;
 @Table(name = "accounts", indexes = {
     @Index(name = "idx_account_number", columnList = "account_number", unique = true),
     @Index(name = "idx_holder_cpf", columnList = "holder_cpf", unique = true),
-    @Index(name = "idx_account_active", columnList = "active")
+    @Index(name = "idx_account_active", columnList = "is_active")
 })
 public class AccountEntity {
 
@@ -36,7 +36,7 @@ public class AccountEntity {
     @Column(name = "balance", precision = 15, scale = 2, nullable = false)
     private BigDecimal balance;
 
-    @Column(name = "active", nullable = false)
+    @Column(name = "is_active", nullable = false)
     private Boolean active;
 
     @Version
