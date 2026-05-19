@@ -51,8 +51,8 @@ spring:
           fetch_size: 50
         order_inserts: true
         order_updates: true
-        connection:
-          provider_disables_autocommit: true
+#        connection:
+#          provider_disables_autocommit: true
 
   # Configuração do Flyway
   flyway:
@@ -123,18 +123,18 @@ banking:
 logging:
   level:
     root: INFO
-    com.banking: DEBUG
-    org.springframework.transaction: DEBUG
+    com.banking: INFO
+    org.springframework.transaction: INFO
     org.springframework.web: INFO
-    org.hibernate.SQL: INFO
-    org.hibernate.type: INFO
+    org.hibernate.SQL: ERROR
+    org.hibernate.type: ERROR
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: logs/application.log
-    max-size: 10MB
-    max-history: 30
+  #   file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+  # file:
+  #   name: logs/application.log
+  #   max-size: 10MB
+  #   max-history: 30
 
 # Configurações de gerenciamento e saúde
 management:
@@ -184,11 +184,11 @@ spring:
       on-profile: dev
   
   jpa:
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
-        generate_statistics: true
+        generate_statistics: false
 
 logging:
   level:

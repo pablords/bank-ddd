@@ -33,22 +33,22 @@ public class CreateAccountHandler implements CommandHandler<CreateAccountCommand
     public AccountResponse handle(CreateAccountCommand command) throws Exception {
         validate(command);
         
+        // Extrair dados do command
+        String holderName = command.getHolderName();
+        String holderCpf = command.getHolderCpf();
+        java.math.BigDecimal initialBalance = command.getInitialBalance();
+
+        // Criar value objects do domínio (validação ocorre aqui, antes da transação)
+        HolderName name = HolderName.of(holderName);
+        Cpf cpf = Cpf.of(holderCpf);
+        Balance balance = Balance.of(initialBalance);
+
+        // Verificar se já existe conta com este CPF (antes da transação para fail-fast limpo)
+        if (accountRepository.existsByHolderCpf(cpf)) {
+            throw new ValidationException("CPF already has an associated account");
+        }
+
         return transactionManager.executeInTransaction(() -> {
-            // Extrair dados do command
-            String holderName = command.getHolderName();
-            String holderCpf = command.getHolderCpf();
-            java.math.BigDecimal initialBalance = command.getInitialBalance();
-
-            // Criar value objects do domínio
-            HolderName name = HolderName.of(holderName);
-            Cpf cpf = Cpf.of(holderCpf);
-            Balance balance = Balance.of(initialBalance);
-
-            // Verificar se já existe conta com este CPF
-            if (accountRepository.existsByHolderCpf(cpf)) {
-                throw new ValidationException("CPF already has an associated account");
-            }
-
             // Gerar número de conta único
             AccountNumber accountNumber = generateUniqueAccountNumber();
 

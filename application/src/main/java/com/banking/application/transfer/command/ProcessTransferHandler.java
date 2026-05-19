@@ -41,20 +41,20 @@ public class ProcessTransferHandler implements CommandHandler<ProcessTransferCom
     public TransferResponse handle(ProcessTransferCommand command) throws Exception {
         validate(command);
 
+        // Criar value objects e validar regras de domínio ANTES de iniciar a transação
+        IdempotencyKey idempotencyKey = IdempotencyKey.of(command.getIdempotencyKey());
+        AccountId fromAccountId = AccountId.of(command.getFromAccountId());
+        AccountId toAccountId = AccountId.of(command.getToAccountId());
+        Amount amount = Amount.of(command.getAmount());
+
         return transactionManager.executeInTransaction(() -> {
             // Verificar idempotência
-            IdempotencyKey idempotencyKey = IdempotencyKey.of(command.getIdempotencyKey());
             if (transferRepository.existsByIdempotencyKey(idempotencyKey)) {
                 // Retornar transferência existente
                 Transfer existingTransfer = transferRepository.findByIdempotencyKey(idempotencyKey)
                     .orElseThrow(() -> new ValidationException("Idempotency key conflict"));
                 return TransferResponse.from(existingTransfer);
             }
-
-            // Criar value objects
-            AccountId fromAccountId = AccountId.of(command.getFromAccountId());
-            AccountId toAccountId = AccountId.of(command.getToAccountId());
-            Amount amount = Amount.of(command.getAmount());
 
             // Buscar contas
             Account fromAccount = accountRepository.findById(fromAccountId)
