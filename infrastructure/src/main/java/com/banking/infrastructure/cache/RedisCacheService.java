@@ -11,8 +11,10 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Implementação do CacheService usando Redis para armazenamento de dados temporários.
- * Fornece operações de cache para melhorar performance e implementar idempotência.
+ * Implementação do CacheService usando Redis para armazenamento de dados
+ * temporários.
+ * Fornece operações de cache para melhorar performance e implementar
+ * idempotência.
  */
 @Service
 public class RedisCacheService implements CacheService {
@@ -58,23 +60,33 @@ public class RedisCacheService implements CacheService {
         return Optional.empty();
     }
 
+    /**
+     * Verifica se uma chave existe no cache
+     */
     @Override
     public boolean exists(String key) {
         return Boolean.TRUE.equals(redisTemplate.hasKey(key));
     }
 
+    /**
+     * Remove uma chave do cache
+     */
     @Override
     public void evict(String key) {
         redisTemplate.delete(key);
     }
 
+    /**
+     * Remove múltiplas chaves do cache
+     */
     @Override
     public void evictAll(String... keys) {
-        if (keys != null && keys.length > 0) {
-            redisTemplate.delete(Set.of(keys));
-        }
+        redisTemplate.delete(Set.of(keys));
     }
 
+    /**
+     * Remove todas as chaves que correspondem ao padrão
+     */
     @Override
     public void evictByPattern(String pattern) {
         Set<String> keys = redisTemplate.keys(pattern);
@@ -83,84 +95,72 @@ public class RedisCacheService implements CacheService {
         }
     }
 
-    @Override
-    public void clear() {
-        // Em produção, esta operação deve ser usada com cuidado
-        Set<String> keys = redisTemplate.keys("*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
-    }
-
+    /**
+     * Define TTL para uma chave existente
+     */
     @Override
     public void expire(String key, Duration ttl) {
         redisTemplate.expire(key, ttl);
     }
 
-    @Override
-    public Optional<Duration> getTtl(String key) {
-        Long ttl = redisTemplate.getExpire(key);
-        if (ttl != null && ttl > 0) {
-            return Optional.of(Duration.ofSeconds(ttl));
-        }
-        return Optional.empty();
-    }
-
-    @Override
-    public Long increment(String key) {
-        return redisTemplate.opsForValue().increment(key);
-    }
-
-    @Override
-    public Long increment(String key, long delta) {
-        return redisTemplate.opsForValue().increment(key, delta);
-    }
-
-    @Override
-    public Long decrement(String key) {
-        return redisTemplate.opsForValue().decrement(key);
-    }
-
-    @Override
-    public Long decrement(String key, long delta) {
-        return redisTemplate.opsForValue().increment(key, -delta);
-    }
-
-    @Override
-    public boolean setIfAbsent(String key, Object value, Duration ttl) {
-        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, ttl));
-    }
-
-    // Métodos adicionais específicos da implementação Redis
-
-    /**
-     * Remove uma chave do cache retornando sucesso
-     */
-    public boolean delete(String key) {
-        return Boolean.TRUE.equals(redisTemplate.delete(key));
-    }
-
-    /**
-     * Remove múltiplas chaves do cache
-     */
-    public long delete(String... keys) {
-        Long deleted = redisTemplate.delete(Set.of(keys));
-        return deleted != null ? deleted : 0;
-    }
-
     /**
      * Define TTL para uma chave existente em segundos
      */
-    public boolean expire(String key, long timeoutSeconds) {
-        return Boolean.TRUE.equals(redisTemplate.expire(key, timeoutSeconds, TimeUnit.SECONDS));
+    public void expire(String key, long timeoutSeconds) {
+        redisTemplate.expire(key, timeoutSeconds, TimeUnit.SECONDS);
     }
 
     /**
-     * Obtém o TTL de uma chave em segundos
+     * Obtém o TTL de uma chave
      */
-    public long getTtlInSeconds(String key) {
+    @Override
+    public Optional<Duration> getTtl(String key) {
         Long ttl = redisTemplate.getExpire(key);
-        return ttl != null ? ttl : -1;
+        return ttl != null ? Optional.of(Duration.ofSeconds(ttl)) : Optional.empty();
+    }
+
+    /**
+     * Incrementa um valor numérico
+     */
+    @Override
+    public long increment(String key) {
+        Long result = redisTemplate.opsForValue().increment(key);
+        return result != null ? result : 0;
+    }
+
+    /**
+     * Incrementa um valor numérico em uma quantidade específica
+     */
+    @Override
+    public long increment(String key, long delta) {
+        Long result = redisTemplate.opsForValue().increment(key, delta);
+        return result != null ? result : 0;
+    }
+
+    /**
+     * Decrementa um valor numérico
+     */
+    @Override
+    public long decrement(String key) {
+        Long result = redisTemplate.opsForValue().decrement(key);
+        return result != null ? result : 0;
+    }
+
+    /**
+     * Decrementa um valor numérico por um delta
+     */
+    @Override
+    public long decrement(String key, long delta) {
+        Long result = redisTemplate.opsForValue().decrement(key, delta);
+        return result != null ? result : 0;
+    }
+
+    /**
+     * Armazena um valor apenas se a chave não existir (operação atômica)
+     */
+    @Override
+    public boolean setIfAbsent(String key, Object value, Duration ttl) {
+        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, ttl));
     }
 
     /**
@@ -173,8 +173,8 @@ public class RedisCacheService implements CacheService {
     /**
      * Limpa todas as chaves do banco de dados atual
      */
-    public void flushDb() {
-        // Usa clear() que é mais seguro e não depende de métodos deprecados
-        clear();
+    @Override
+    public void clear() {
+        redisTemplate.getConnectionFactory().getConnection().flushDb();
     }
 }

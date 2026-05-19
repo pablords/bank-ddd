@@ -62,22 +62,23 @@ public interface CacheService {
     /**
      * Incrementa um valor numérico
      */
-    Long increment(String key);
+    long increment(String key);
 
     /**
      * Incrementa um valor numérico por um delta
      */
-    Long increment(String key, long delta);
+    long increment(String key, long delta);
 
     /**
      * Decrementa um valor numérico
      */
-    Long decrement(String key);
+
+    long decrement(String key);
 
     /**
      * Decrementa um valor numérico por um delta
      */
-    Long decrement(String key, long delta);
+    long decrement(String key, long delta);
 
     /**
      * Define um valor apenas se a chave não existir (operação atômica)
